@@ -1,0 +1,16 @@
+<resources>
+    <string name="app_name">Android AT commands</string>
+    <string name="error_configuration">Please configure your serial port first.</string>
+    <string name="error_security">You do not have read/write permission to the serial
+		port.</string>
+    <string name="error_unknown">The serial port can not be opened for an unknown
+		reason.</string>
+    <string name="quick_scan_button_title">Quick scan</string>
+    <string name="settings_button_title">Settings</string>
+    <string name="console_button_title">Console</string>
+    <string name="settings_title">Settings</string>
+    <string name="device_preference_title">Device name</string>
+    <string name="default_device">/dev/smd11</string>
+    <string name="baudrate_preference_title">Baudrate</string>
+    <string name="default_baudrate">9600</string>
+</resources>

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <EditTextPreference
+        android:defaultValue="@string/default_device"
+        android:key="device_preference"
+        android:selectAllOnFocus="true"
+        android:singleLine="true"
+        android:title="@string/device_preference_title"
+        android:persistent="true"/>
+    <ListPreference
+        android:defaultValue="@string/default_baudrate"
+        android:entries="@array/baudrates_name"
+        android:entryValues="@array/baudrates_value"
+        android:key="baudrate_preference"
+        android:persistent="true"
+        android:title="@string/baudrate_preference_title"/>
+</PreferenceScreen>
