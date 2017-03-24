@@ -18,10 +18,11 @@
         </activity>
         <activity
             android:name=".SettingsActivity"
-            android:theme="@style/AppTheme" >
+            android:theme="@style/AppTheme">
         </activity>
-        <activity
-            android:name="ConsoleActivity" >
+        <activity android:name=".ConsoleActivity">
+        </activity>
+        <activity android:name=".ScanActivity">
         </activity>
     </application>
 

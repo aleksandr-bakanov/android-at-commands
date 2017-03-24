@@ -26,55 +26,91 @@ import java.io.IOException;
 
 public class ConsoleActivity extends SerialPortActivity {
 
-	EditText mReception;
+    private ReadThread mReadThread;
 
-	@Override
-	protected void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
-		setContentView(R.layout.console);
+    private class ReadThread extends Thread {
 
-		mReception = (EditText) findViewById(R.id.EditTextReception);
+        @Override
+        public void run() {
+            super.run();
+            while(!isInterrupted()) {
+                int size;
+                try {
+                    if (mInputStream == null) return;
+                    byte[] buffer = new byte[READ_BUFFER_SIZE];
+                    size = mInputStream.read(buffer);
+                    if (size > 0) {
+                        onDataReceived(buffer, size);
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    return;
+                }
+            }
+        }
+    }
 
-		EditText Emission = (EditText) findViewById(R.id.EditTextEmission);
-		Emission.addTextChangedListener(new TextWatcher() {
+    EditText mReception;
 
-			@Override
-			public void onTextChanged(CharSequence s, int start, int before, int count) {
-			}
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_console);
 
-			@Override
-			public void beforeTextChanged(CharSequence s, int start, int count,
-										  int after) {
-			}
+        mReception = (EditText) findViewById(R.id.EditTextReception);
 
-			@Override
-			public void afterTextChanged(Editable s) {
-				if (s.length() > 1 && s.charAt(s.length() - 1) == '\n') {
-					Log.d("TEST RESPONSE", "Enter was pressed");
-					int size = s.length() - 1;
-					char[] text = new char[size];
-					for (int i = 0; i < size; i++) {
-						text[i] = s.charAt(i);
-					}
-					try {
-						mOutputStream.write(new String(text).getBytes());
-						mOutputStream.write('\r');
-					} catch (IOException e) {
-						e.printStackTrace();
-					}
-				}
-			}
-		});
-	}
+        EditText Emission = (EditText) findViewById(R.id.EditTextEmission);
+        Emission.addTextChangedListener(new TextWatcher() {
 
-	@Override
-	protected void onDataReceived(final byte[] buffer, final int size) {
-		runOnUiThread(new Runnable() {
-			public void run() {
-				if (mReception != null) {
-					mReception.append(new String(buffer, 0, size));
-				}
-			}
-		});
-	}
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+            }
+
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count,
+                                          int after) {
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                if (s.length() > 1 && s.charAt(s.length() - 1) == '\n') {
+                    Log.d("ConsoleActivity", "Enter was pressed");
+                    int size = s.length() - 1;
+                    char[] text = new char[size];
+                    for (int i = 0; i < size; i++) {
+                        text[i] = s.charAt(i);
+                    }
+                    try {
+                        mOutputStream.write(new String(text).getBytes());
+                        mOutputStream.write('\r');
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        });
+
+        /* Create a receiving thread */
+        mReadThread = new ReadThread();
+        mReadThread.start();
+    }
+
+    protected void onDataReceived(final byte[] buffer, final int size) {
+        runOnUiThread(new Runnable() {
+            public void run() {
+                if (mReception != null) {
+                    String s = new String(buffer, 0, size);
+                    Log.d("ConsoleActivity", "onDataReceived (" + Integer.toString(size) + "): " + s);
+                    mReception.append(s);
+                }
+            }
+        });
+    }
+
+    @Override
+    protected void onDestroy() {
+        if (mReadThread != null)
+            mReadThread.interrupt();
+        super.onDestroy();
+    }
 }

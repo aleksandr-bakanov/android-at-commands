@@ -13,4 +13,6 @@
     <string name="default_device">/dev/smd11</string>
     <string name="baudrate_preference_title">Baudrate</string>
     <string name="default_baudrate">9600</string>
+    <string name="start_scan_button_title">Start scan</string>
+    <string name="stop_scan_button_title">Stop</string>
 </resources>

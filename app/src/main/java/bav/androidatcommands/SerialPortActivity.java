@@ -30,99 +30,71 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.security.InvalidParameterException;
 
-public abstract class SerialPortActivity extends AppCompatActivity {
+public class SerialPortActivity extends AppCompatActivity {
 
-	protected SerialPort mSerialPort;
-	protected OutputStream mOutputStream;
-	private InputStream mInputStream;
-	private ReadThread mReadThread;
+    protected static final int READ_BUFFER_SIZE = 1024;
+    protected SerialPort mSerialPort;
+    protected OutputStream mOutputStream;
+    protected InputStream mInputStream;
 
-	private class ReadThread extends Thread {
+    private void DisplayError(int resourceId) {
+        AlertDialog.Builder b = new AlertDialog.Builder(this);
+        b.setTitle("Error");
+        b.setMessage(resourceId);
+        b.setPositiveButton("OK", new OnClickListener() {
+            public void onClick(DialogInterface dialog, int which) {
+                SerialPortActivity.this.finish();
+            }
+        });
+        b.show();
+    }
 
-		@Override
-		public void run() {
-			super.run();
-			while(!isInterrupted()) {
-				int size;
-				try {
-					byte[] buffer = new byte[64];
-					if (mInputStream == null) return;
-					size = mInputStream.read(buffer);
-					if (size > 0) {
-						onDataReceived(buffer, size);
-					}
-				} catch (IOException e) {
-					e.printStackTrace();
-					return;
-				}
-			}
-		}
-	}
+    public void openSerialPort() throws SecurityException, IOException, InvalidParameterException {
+        if (mSerialPort == null) {
+            /* Read serial port parameters */
+            SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(getApplication());
+            String path = sp.getString("device_preference", "");
+            int baudrate = Integer.decode(sp.getString("baudrate_preference", "-1"));
 
-	private void DisplayError(int resourceId) {
-		AlertDialog.Builder b = new AlertDialog.Builder(this);
-		b.setTitle("Error");
-		b.setMessage(resourceId);
-		b.setPositiveButton("OK", new OnClickListener() {
-			public void onClick(DialogInterface dialog, int which) {
-				SerialPortActivity.this.finish();
-			}
-		});
-		b.show();
-	}
+            /* Check parameters */
+            if ( (path.length() == 0) || (baudrate == -1)) {
+                throw new InvalidParameterException();
+            }
 
-	public void openSerialPort() throws SecurityException, IOException, InvalidParameterException {
-		if (mSerialPort == null) {
-			/* Read serial port parameters */
-			SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(getApplication());
-			String path = sp.getString("device_preference", "");
-			int baudrate = Integer.decode(sp.getString("baudrate_preference", "-1"));
+            /* Open the serial port */
+            mSerialPort = new SerialPort(new File(path), baudrate, 0);
+        }
+    }
 
-			/* Check parameters */
-			if ( (path.length() == 0) || (baudrate == -1)) {
-				throw new InvalidParameterException();
-			}
+    public void closeSerialPort() {
+        if (mSerialPort != null) {
+            mSerialPort.close();
+            mSerialPort = null;
+        }
+    }
 
-			/* Open the serial port */
-			mSerialPort = new SerialPort(new File(path), baudrate, 0);
-		}
-	}
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
 
-	public void closeSerialPort() {
-		if (mSerialPort != null) {
-			mSerialPort.close();
-			mSerialPort = null;
-		}
-	}
+        try {
+            openSerialPort();
+            mOutputStream = mSerialPort.getOutputStream();
+            mInputStream = mSerialPort.getInputStream();
 
-	@Override
-	protected void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
 
-		try {
-			openSerialPort();
-			mOutputStream = mSerialPort.getOutputStream();
-			mInputStream = mSerialPort.getInputStream();
+        } catch (SecurityException e) {
+            DisplayError(R.string.error_security);
+        } catch (IOException e) {
+            DisplayError(R.string.error_unknown);
+        } catch (InvalidParameterException e) {
+            DisplayError(R.string.error_configuration);
+        }
+    }
 
-			/* Create a receiving thread */
-			mReadThread = new ReadThread();
-			mReadThread.start();
-		} catch (SecurityException e) {
-			DisplayError(R.string.error_security);
-		} catch (IOException e) {
-			DisplayError(R.string.error_unknown);
-		} catch (InvalidParameterException e) {
-			DisplayError(R.string.error_configuration);
-		}
-	}
-
-	protected abstract void onDataReceived(final byte[] buffer, final int size);
-
-	@Override
-	protected void onDestroy() {
-		if (mReadThread != null)
-			mReadThread.interrupt();
-		closeSerialPort();
-		super.onDestroy();
-	}
+    @Override
+    protected void onDestroy() {
+        closeSerialPort();
+        super.onDestroy();
+    }
 }

@@ -20,6 +20,7 @@
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <poll.h>
 #include <fcntl.h>
 #include <string.h>
 #include <jni.h>
@@ -67,6 +68,18 @@ static speed_t getBaudrate(jint baudrate)
     }
 }
 
+static int getDescriptorFromJavaFileDescriptor(JNIEnv *env, jobject instance) {
+    jclass SerialPortClass = env->GetObjectClass(instance);
+    jclass FileDescriptorClass = env->FindClass("java/io/FileDescriptor");
+
+    jfieldID mFdID = env->GetFieldID(SerialPortClass, "mFd", "Ljava/io/FileDescriptor;");
+    jfieldID descriptorID = env->GetFieldID(FileDescriptorClass, "descriptor", "I");
+
+    jobject mFd = env->GetObjectField(instance, mFdID);
+    jint descriptor = env->GetIntField(mFd, descriptorID);
+    return descriptor;
+}
+
 extern "C"
 {
 
@@ -81,7 +94,6 @@ Java_bav_androidatcommands_SerialPort_open(JNIEnv *env, jclass type, jstring pat
     {
         speed = getBaudrate(baudrate);
         if (speed == -1) {
-            /* TODO: throw an exception */
             LOGE("Invalid baudrate");
             return NULL;
         }
@@ -98,7 +110,6 @@ Java_bav_androidatcommands_SerialPort_open(JNIEnv *env, jclass type, jstring pat
         if (fd == -1) {
             /* Throw an exception */
             LOGE("Cannot open port %s", strerror(errno));
-            /* TODO: throw an exception */
             return NULL;
         }
     }
@@ -110,7 +121,6 @@ Java_bav_androidatcommands_SerialPort_open(JNIEnv *env, jclass type, jstring pat
         if (tcgetattr(fd, &cfg)) {
             LOGE("tcgetattr() failed");
             close(fd);
-            /* TODO: throw an exception */
             return NULL;
         }
 
@@ -121,7 +131,6 @@ Java_bav_androidatcommands_SerialPort_open(JNIEnv *env, jclass type, jstring pat
         if (tcsetattr(fd, TCSANOW, &cfg)) {
             LOGE("tcsetattr() failed");
             close(fd);
-            /* TODO: throw an exception */
             return NULL;
         }
     }
@@ -140,31 +149,21 @@ Java_bav_androidatcommands_SerialPort_open(JNIEnv *env, jclass type, jstring pat
 
 JNIEXPORT void JNICALL
 Java_bav_androidatcommands_SerialPort_close(JNIEnv *env, jobject instance) {
-    jclass SerialPortClass = env->GetObjectClass(instance);
-    jclass FileDescriptorClass = env->FindClass("java/io/FileDescriptor");
-
-    jfieldID mFdID = env->GetFieldID(SerialPortClass, "mFd", "Ljava/io/FileDescriptor;");
-    jfieldID descriptorID = env->GetFieldID(FileDescriptorClass, "descriptor", "I");
-
-    jobject mFd = env->GetObjectField(instance, mFdID);
-    jint descriptor = env->GetIntField(mFd, descriptorID);
-
+    int descriptor = getDescriptorFromJavaFileDescriptor(env, instance);
     LOGD("close(fd = %d)", descriptor);
     close(descriptor);
 }
 
+JNIEXPORT jboolean JNICALL
+Java_bav_androidatcommands_SerialPort_poll(JNIEnv *env, jobject instance) {
+    int descriptor = getDescriptorFromJavaFileDescriptor(env, instance);
+    struct pollfd pfds;
+    pfds.fd = descriptor;
+    pfds.events = POLLIN;
+    /// TODO: check return value of poll
+    poll(&pfds, 1, 0);
+    bool isInputAvailable = (pfds.revents & POLLIN) != 0;
+    return (jboolean) isInputAvailable;
 }
 
-/*
-jint JNI_OnLoad(JavaVM *vm, void *reserved) {
-    JNIEnv *env;
-    if (vm->GetEnv(reinterpret_cast<void **>(&env), JNI_VERSION_1_6) != JNI_OK) {
-        return -1;
-    }
-
-    // Get jclass with env->FindClass.
-    // Register methods with env->RegisterNatives.
-
-    return JNI_VERSION_1_6;
 }
-*/
