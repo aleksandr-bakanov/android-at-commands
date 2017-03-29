@@ -1,9 +1,5 @@
 package bav.androidatcommands.commands;
 
-/**
- * Created by bav on 16.03.2017.
- */
-
 public class ATcommand implements IATcommand {
 
     protected static int DEFAULT_ANSWER_WAIT_TIMEOUT_MS = 20;
@@ -177,8 +173,8 @@ public class ATcommand implements IATcommand {
             return new AtDolCCLK();
         } else if (cmd.equals("+CHUP")) {
             return new AtPlusCHUP();
-        } else if (cmd.equals("+C")) {
-            return new AtPlusC();
+        } else if (cmd.equals("+CR")) {
+            return new AtPlusCR();
         } else if (cmd.equals("+CMUX")) {
             return new AtPlusCMUX();
         } else if (cmd.equals("+CMGW")) {
@@ -215,10 +211,10 @@ public class ATcommand implements IATcommand {
             return new AtPlusCRES();
         } else if (cmd.equals("+FDD")) {
             return new AtPlusFDD();
-        } else if (cmd.equals("$QCMD")) {
-            return new AtDolQCMD();
-        } else if (cmd.equals("+FC")) {
-            return new AtPlusFC();
+        } else if (cmd.equals("$QCMDR")) {
+            return new AtDolQCMDR();
+        } else if (cmd.equals("+FCR")) {
+            return new AtPlusFCR();
         } else if (cmd.equals("+CGDSCONT")) {
             return new AtPlusCGDSCONT();
         } else if (cmd.equals("+COLP")) {
@@ -253,8 +249,8 @@ public class ATcommand implements IATcommand {
             return new AtPlusCPBF();
         } else if (cmd.equals("$QCMGF")) {
             return new AtDolQCMGF();
-        } else if (cmd.equals("$QCCL")) {
-            return new AtDolQCCL();
+        } else if (cmd.equals("$QCCLR")) {
+            return new AtDolQCCLR();
         } else if (cmd.equals("$QCSIMSTAT")) {
             return new AtDolQCSIMSTAT();
         } else if (cmd.equals("+CPBW")) {
@@ -265,16 +261,16 @@ public class ATcommand implements IATcommand {
             return new AtDolQCMGW();
         } else if (cmd.equals("+FBS")) {
             return new AtPlusFBS();
-        } else if (cmd.equals("+ES")) {
-            return new AtPlusES();
+        } else if (cmd.equals("+ESR")) {
+            return new AtPlusESR();
         } else if (cmd.equals("$QCMGL")) {
             return new AtDolQCMGL();
         } else if (cmd.equals("+FSP")) {
             return new AtPlusFSP();
         } else if (cmd.equals("$QCSIMAPP")) {
             return new AtDolQCSIMAPP();
-        } else if (cmd.equals("+E")) {
-            return new AtPlusE();
+        } else if (cmd.equals("+ER")) {
+            return new AtPlusER();
         } else if (cmd.equals("+FPA")) {
             return new AtPlusFPA();
         } else if (cmd.equals("+MA")) {
@@ -319,8 +315,8 @@ public class ATcommand implements IATcommand {
             return new AtPlusQCPWD();
         } else if (cmd.equals("+CSCA")) {
             return new AtPlusCSCA();
-        } else if (cmd.equals("+CEE")) {
-            return new AtPlusCEE();
+        } else if (cmd.equals("+CEER")) {
+            return new AtPlusCEER();
         } else if (cmd.equals("+CHV")) {
             return new AtPlusCHV();
         } else if (cmd.equals("+CRC")) {
@@ -367,8 +363,8 @@ public class ATcommand implements IATcommand {
             return new AtI();
         } else if (cmd.equals("^CPIN")) {
             return new AtCarCPIN();
-        } else if (cmd.equals("+CGM")) {
-            return new AtPlusCGM();
+        } else if (cmd.equals("+CGMR")) {
+            return new AtPlusCGMR();
         } else if (cmd.equals("+CMIP")) {
             return new AtPlusCMIP();
         } else if (cmd.equals("+CHLD")) {
@@ -413,12 +409,12 @@ public class ATcommand implements IATcommand {
             return new AtPlusCCWA();
         } else if (cmd.equals("+FRY")) {
             return new AtPlusFRY();
-        } else if (cmd.equals("+CGPADD")) {
-            return new AtPlusCGPADD();
-        } else if (cmd.equals("$QCDM")) {
-            return new AtDolQCDM();
-        } else if (cmd.equals("+FD")) {
-            return new AtPlusFD();
+        } else if (cmd.equals("+CGPADDR")) {
+            return new AtPlusCGPADDR();
+        } else if (cmd.equals("$QCDMR")) {
+            return new AtDolQCDMR();
+        } else if (cmd.equals("+FDR")) {
+            return new AtPlusFDR();
         } else if (cmd.equals("+MS")) {
             return new AtPlusMS();
         } else if (cmd.equals("$QCSMP")) {
@@ -437,20 +433,20 @@ public class ATcommand implements IATcommand {
             return new AtPlusCPOL();
         } else if (cmd.equals("+CGMM")) {
             return new AtPlusCGMM();
-        } else if (cmd.equals("+ILR")) {
-            return new AtPlusILR();
+        } else if (cmd.equals("+ILRR")) {
+            return new AtPlusILRR();
         } else if (cmd.equals("+CSTF")) {
             return new AtPlusCSTF();
         } else if (cmd.equals("+ETBM")) {
             return new AtPlusETBM();
         } else if (cmd.equals("+CHV0")) {
             return new AtPlusCHV0();
-        } else if (cmd.equals("+GM")) {
-            return new AtPlusGM();
+        } else if (cmd.equals("+GMR")) {
+            return new AtPlusGMR();
         } else if (cmd.equals("+CFG")) {
             return new AtPlusCFG();
-        } else if (cmd.equals("+D")) {
-            return new AtPlusD();
+        } else if (cmd.equals("+DR")) {
+            return new AtPlusDR();
         } else if (cmd.equals("$QCDRX")) {
             return new AtDolQCDRX();
         } else if (cmd.equals("+CSSN")) {
@@ -471,8 +467,8 @@ public class ATcommand implements IATcommand {
             return new AtCarCARDMODE();
         } else if (cmd.equals("+FRH")) {
             return new AtPlusFRH();
-        } else if (cmd.equals("+MV18")) {
-            return new AtPlusMV18();
+        } else if (cmd.equals("+MV18R")) {
+            return new AtPlusMV18R();
         } else if (cmd.equals("+FCLASS")) {
             return new AtPlusFCLASS();
         } else if (cmd.equals("+GMI")) {
@@ -507,8 +503,8 @@ public class ATcommand implements IATcommand {
             return new AtDolQCCNMI();
         } else if (cmd.equals("&S")) {
             return new AtAmpS();
-        } else if (cmd.equals("+IP")) {
-            return new AtPlusIP();
+        } else if (cmd.equals("+IPR")) {
+            return new AtPlusIPR();
         } else if (cmd.equals("+FHS")) {
             return new AtPlusFHS();
         } else if (cmd.equals("+CEREG")) {
@@ -547,8 +543,8 @@ public class ATcommand implements IATcommand {
             return new AtDolQCMRUE();
         } else if (cmd.equals("$QCMIPT")) {
             return new AtDolQCMIPT();
-        } else if (cmd.equals("+CD")) {
-            return new AtPlusCD();
+        } else if (cmd.equals("+CDR")) {
+            return new AtPlusCDR();
         } else if (cmd.equals("$QCMIPMHSSX")) {
             return new AtDolQCMIPMHSSX();
         } else if (cmd.equals("+CCFC")) {
@@ -563,8 +559,8 @@ public class ATcommand implements IATcommand {
             return new AtPlusCLCC();
         } else if (cmd.equals("+FRM")) {
             return new AtPlusFRM();
-        } else if (cmd.equals("+CPB")) {
-            return new AtPlusCPB();
+        } else if (cmd.equals("+CPBR")) {
+            return new AtPlusCPBR();
         } else if (cmd.equals("$QCMRUC")) {
             return new AtDolQCMRUC();
         } else if (cmd.equals("+DS")) {
@@ -595,14 +591,14 @@ public class ATcommand implements IATcommand {
             return new AtDolQCSYSMODE();
         } else if (cmd.equals("$QCRSRQ")) {
             return new AtDolQCRSRQ();
-        } else if (cmd.equals("+CMG")) {
-            return new AtPlusCMG();
+        } else if (cmd.equals("+CMGR")) {
+            return new AtPlusCMGR();
         } else if (cmd.equals("+QCCSS")) {
             return new AtPlusQCCSS();
         } else if (cmd.equals("+CLIP")) {
             return new AtPlusCLIP();
-        } else if (cmd.equals("$QCTE")) {
-            return new AtDolQCTE();
+        } else if (cmd.equals("$QCTER")) {
+            return new AtDolQCTER();
         } else if (cmd.equals("Z")) {
             return new AtZ();
         } else if (cmd.equals("+FIP")) {
@@ -661,16 +657,16 @@ public class ATcommand implements IATcommand {
             return new AtPlusCMGS();
         } else if (cmd.equals("+CFUN")) {
             return new AtPlusCFUN();
-        } else if (cmd.equals("+CLI")) {
-            return new AtPlusCLI();
+        } else if (cmd.equals("+CLIR")) {
+            return new AtPlusCLIR();
         } else if (cmd.equals("S104")) {
             return new AtS104();
-        } else if (cmd.equals("$QCHDR")) {
-            return new AtDolQCHDR();
+        } else if (cmd.equals("$QCHDRR")) {
+            return new AtDolQCHDRR();
         } else if (cmd.equals("+CNUM")) {
             return new AtPlusCNUM();
-        } else if (cmd.equals("+FP")) {
-            return new AtPlusFP();
+        } else if (cmd.equals("+FPR")) {
+            return new AtPlusFPR();
         } else if (cmd.equals("+CRM")) {
             return new AtPlusCRM();
         } else if (cmd.equals("+CGEQMIN")) {
@@ -715,8 +711,8 @@ public class ATcommand implements IATcommand {
             return new AtPlusCHSN();
         } else if (cmd.equals("E")) {
             return new AtE();
-        } else if (cmd.equals("+CME")) {
-            return new AtPlusCME();
+        } else if (cmd.equals("+CMER")) {
+            return new AtPlusCMER();
         } else if (cmd.equals("+CGMI")) {
             return new AtPlusCGMI();
         } else if (cmd.equals("^CGSN")) {
@@ -743,8 +739,8 @@ public class ATcommand implements IATcommand {
             return new AtDolQCDEFPROF();
         } else if (cmd.equals("+CPMS")) {
             return new AtPlusCPMS();
-        } else if (cmd.equals("^HWVE")) {
-            return new AtCarHWVE();
+        } else if (cmd.equals("^HWVER")) {
+            return new AtCarHWVER();
         } else if (cmd.equals("+ES")) {
             return new AtPlusES();
         } else if (cmd.equals("+QCPIN")) {

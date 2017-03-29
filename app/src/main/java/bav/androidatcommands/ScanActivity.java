@@ -29,23 +29,25 @@ public class ScanActivity extends SerialPortActivity {
         public void run() {
             IATcommand atClac = ATcommand.getCommand("+CLAC");
             runCommand(atClac);
-            String[] commands = atClac.getRawAnswerClean().split("\\r?\\n");
-            //Set<String> cSet = new HashSet<>(Arrays.asList(commands));
+            String[] commandsByClac = atClac.getRawAnswerClean().split("\\r?\\n");
+            for (int i = 0; i < commandsByClac.length; i++) {
+                commandsByClac[i] = commandsByClac[i].trim();
+            }
 
             IATcommand atQClac = ATcommand.getCommand("$QCCLAC");
             runCommand(atQClac);
-            String[] qcommands = atQClac.getRawAnswerClean().split("\\r?\\n");
-            //Set<String> qSet = new HashSet<>(Arrays.asList(qcommands));
+            String[] commandsByQcClac = atQClac.getRawAnswerClean().split("\\r?\\n");
+            for (int i = 0; i < commandsByQcClac.length; i++) {
+                commandsByQcClac[i] = commandsByQcClac[i].trim();
+            }
 
             HashSet<String> fullSet = new HashSet<>();
-            Collections.addAll(fullSet, commands);
-            Collections.addAll(fullSet, qcommands);
-            fullSet.remove("\n");
-            fullSet.remove("AT+CLAC");
-            fullSet.remove("OK");
-            fullSet.remove("AT$QCCLAC");
-
-            Log.d(TAG, fullSet.toString());
+            Collections.addAll(fullSet, commandsByClac);
+            Collections.addAll(fullSet, commandsByQcClac);
+            String[] redundantCommands = {"", "AT+CLAC", "OK", "AT$QCCLAC"};
+            for (String s : redundantCommands) {
+                boolean r = fullSet.remove(s);
+            }
 
             //mCommands.put(atClac.getCommand(), atClac);
         }
