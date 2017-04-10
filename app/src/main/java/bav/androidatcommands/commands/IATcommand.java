@@ -14,4 +14,5 @@ public interface IATcommand {
     void setRawAnswerClean(String rawAnswerClean);
     void setRawAnswerAvailable(String rawAnswerAvailable);
     void setRawAnswerCurrent(String rawAnswerCurrent);
+    boolean isRunAllowed(int format);
 }

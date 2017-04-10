@@ -6,7 +6,6 @@ import android.view.View;
 import android.widget.Button;
 
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Hashtable;
@@ -20,21 +19,21 @@ import static java.lang.System.currentTimeMillis;
 public class ScanActivity extends SerialPortActivity {
 
     private static final String TAG = "ScanActivity";
-    private static final int POLL_TIMEOUT_STEP_MS = 10;
+    private static final int POLL_TIMEOUT_STEP_MS = 5;
 
     private Hashtable<String, IATcommand> mCommands;
     private Thread mScanTask;
 
     private class ScanTask implements Runnable {
         public void run() {
-            IATcommand atClac = ATcommand.getCommand("+CLAC");
+            IATcommand atClac = ATcommand.getCommand("+CLAC", getApplicationContext());
             runCommand(atClac);
             String[] commandsByClac = atClac.getRawAnswerClean().split("\\r?\\n");
             for (int i = 0; i < commandsByClac.length; i++) {
                 commandsByClac[i] = commandsByClac[i].trim();
             }
 
-            IATcommand atQClac = ATcommand.getCommand("$QCCLAC");
+            IATcommand atQClac = ATcommand.getCommand("$QCCLAC", getApplicationContext());
             runCommand(atQClac);
             String[] commandsByQcClac = atQClac.getRawAnswerClean().split("\\r?\\n");
             for (int i = 0; i < commandsByQcClac.length; i++) {
@@ -44,12 +43,29 @@ public class ScanActivity extends SerialPortActivity {
             HashSet<String> fullSet = new HashSet<>();
             Collections.addAll(fullSet, commandsByClac);
             Collections.addAll(fullSet, commandsByQcClac);
-            String[] redundantCommands = {"", "AT+CLAC", "OK", "AT$QCCLAC"};
+
+            String[] redundantCommands = {"", "AT+CLAC", "OK", "AT$QCCLAC", "ERROR"};
             for (String s : redundantCommands) {
-                boolean r = fullSet.remove(s);
+                fullSet.remove(s);
             }
 
-            //mCommands.put(atClac.getCommand(), atClac);
+            for (String c : fullSet) {
+                IATcommand command = ATcommand.getCommand(c, getApplicationContext());
+                if (command != null) {
+                    mCommands.put(c, command);
+                }
+                else {
+                    Log.d(TAG, "Description for command \"" + c + "\" wasn't found.");
+                }
+            }
+
+            Set<String> keys = mCommands.keySet();
+            for (String k : keys) {
+                IATcommand cmd = mCommands.get(k);
+                if (cmd != null) {
+                    runCommand(cmd);
+                }
+            }
         }
     }
 
@@ -98,7 +114,9 @@ public class ScanActivity extends SerialPortActivity {
     }
 
     private void writeCommand(String command) {
+        String at = "AT";
         try {
+            mOutputStream.write(at.getBytes());
             mOutputStream.write(command.getBytes());
             mOutputStream.write('\r');
         } catch (IOException e) {
@@ -109,25 +127,32 @@ public class ScanActivity extends SerialPortActivity {
     private void runCommand(IATcommand aTcommand) {
         long start = currentTimeMillis();
         int timeout = aTcommand.getTimeout();
-        // Execute clean command
-        String cleanCommand = aTcommand.getCommand();
-        writeCommand(cleanCommand);
-        String answerClean = readRawAnswer(timeout);
-        aTcommand.setRawAnswerClean(answerClean);
 
-        // Execute available command
-        String availableCommand = aTcommand.getCommand() + "=?";
-        writeCommand(availableCommand);
-        String answerAvailable = readRawAnswer(timeout);
-        aTcommand.setRawAnswerAvailable(answerAvailable);
+        // Execute clean command if it's allowed
+        if (aTcommand.isRunAllowed(ATcommand.CLEAN)) {
+            String cleanCommand = aTcommand.getCommand();
+            writeCommand(cleanCommand);
+            String answerClean = readRawAnswer(timeout);
+            aTcommand.setRawAnswerClean(answerClean);
+        }
 
-        // Execute current command
-        String currentCommand = aTcommand.getCommand() + "?";
-        writeCommand(currentCommand);
-        String answerCurrent = readRawAnswer(timeout);
-        aTcommand.setRawAnswerCurrent(answerCurrent);
+        // Execute available command if it's allowed
+        if (aTcommand.isRunAllowed(ATcommand.AVAILABLE)) {
+            String availableCommand = aTcommand.getCommand() + "=?";
+            writeCommand(availableCommand);
+            String answerAvailable = readRawAnswer(timeout);
+            aTcommand.setRawAnswerAvailable(answerAvailable);
+        }
+
+        // Execute current command if it's allowed
+        if (aTcommand.isRunAllowed(ATcommand.CURRENT)) {
+            String currentCommand = aTcommand.getCommand() + "?";
+            writeCommand(currentCommand);
+            String answerCurrent = readRawAnswer(timeout);
+            aTcommand.setRawAnswerCurrent(answerCurrent);
+        }
 
         long end = currentTimeMillis() - start;
-        Log.d(TAG, "execution took: " + String.valueOf(end) + " ms");
+        Log.d(TAG, "\"" + aTcommand.getCommand() + "\" execution took " + String.valueOf(end) + " ms");
     }
 }
