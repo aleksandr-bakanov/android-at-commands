@@ -1,14 +1,25 @@
 package bav.androidatcommands;
 
 import android.os.Bundle;
+import android.os.Environment;
+import android.os.Handler;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
+import android.widget.ProgressBar;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Hashtable;
+import java.util.List;
 import java.util.Set;
 
 import bav.androidatcommands.commands.ATcommand;
@@ -20,12 +31,25 @@ public class ScanActivity extends SerialPortActivity {
 
     private static final String TAG = "ScanActivity";
     private static final int POLL_TIMEOUT_STEP_MS = 5;
+    private static final String COMMAND_EXECUTED_BG_COLOR = "#CCFBCC";
+    private static final String COMMAND_NOT_EXECUTED_BG_COLOR = "#FBCCCC";
 
     private Hashtable<String, IATcommand> mCommands;
     private Thread mScanTask;
 
+    private ProgressBar mProgress;
+    private EditText mDebugOutput;
+    private Handler mHandler = new Handler();
+    private int mProgressStatus = 0;
+
     private class ScanTask implements Runnable {
         public void run() {
+            mHandler.post(new Runnable() {
+                public void run() {
+                    mDebugOutput.append("Start scanning\r\n");
+                }
+            });
+
             IATcommand atClac = ATcommand.getCommand("+CLAC", getApplicationContext());
             runCommand(atClac);
             String[] commandsByClac = atClac.getRawAnswerClean().split("\\r?\\n");
@@ -40,7 +64,7 @@ public class ScanActivity extends SerialPortActivity {
                 commandsByQcClac[i] = commandsByQcClac[i].trim();
             }
 
-            HashSet<String> fullSet = new HashSet<>();
+            final HashSet<String> fullSet = new HashSet<>();
             Collections.addAll(fullSet, commandsByClac);
             Collections.addAll(fullSet, commandsByQcClac);
 
@@ -48,6 +72,12 @@ public class ScanActivity extends SerialPortActivity {
             for (String s : redundantCommands) {
                 fullSet.remove(s);
             }
+
+            mHandler.post(new Runnable() {
+                public void run() {
+                    mDebugOutput.append(String.valueOf(fullSet.size()) + " commands found\r\n");
+                }
+            });
 
             for (String c : fullSet) {
                 IATcommand command = ATcommand.getCommand(c, getApplicationContext());
@@ -59,20 +89,142 @@ public class ScanActivity extends SerialPortActivity {
                 }
             }
 
+            StringBuilder htmlBuilder = new StringBuilder();
+            /// TODO: localize html
+            htmlBuilder.append("<html><head><meta charset=\"UTF-8\"><style>table{width:100%;}table,th,td{border:1px solid black;}</style></head><body>");
+
+            // References list
+            htmlBuilder.append("<h2>References</h2>");
+            htmlBuilder.append("<ol>");
+            htmlBuilder.append("<li>"); htmlBuilder.append(getString(R.string.desc_ref_001)); htmlBuilder.append("</li>");
+            htmlBuilder.append("<li>"); htmlBuilder.append(getString(R.string.desc_ref_002)); htmlBuilder.append("</li>");
+            htmlBuilder.append("<li>"); htmlBuilder.append(getString(R.string.desc_ref_003)); htmlBuilder.append("</li>");
+            htmlBuilder.append("<li>"); htmlBuilder.append(getString(R.string.desc_ref_004)); htmlBuilder.append("</li>");
+            htmlBuilder.append("<li>"); htmlBuilder.append(getString(R.string.desc_ref_005)); htmlBuilder.append("</li>");
+            htmlBuilder.append("<li>"); htmlBuilder.append(getString(R.string.desc_ref_006)); htmlBuilder.append("</li>");
+            htmlBuilder.append("<li>"); htmlBuilder.append(getString(R.string.desc_ref_007)); htmlBuilder.append("</li>");
+            htmlBuilder.append("<li>"); htmlBuilder.append(getString(R.string.desc_ref_008)); htmlBuilder.append("</li>");
+            htmlBuilder.append("<li>"); htmlBuilder.append(getString(R.string.desc_ref_009)); htmlBuilder.append("</li>");
+            htmlBuilder.append("<li>"); htmlBuilder.append(getString(R.string.desc_ref_010)); htmlBuilder.append("</li>");
+            htmlBuilder.append("<li>"); htmlBuilder.append(getString(R.string.desc_ref_011)); htmlBuilder.append("</li>");
+            htmlBuilder.append("<li>"); htmlBuilder.append(getString(R.string.desc_ref_012)); htmlBuilder.append("</li>");
+            htmlBuilder.append("<li>"); htmlBuilder.append(getString(R.string.desc_ref_013)); htmlBuilder.append("</li>");
+            htmlBuilder.append("<li>"); htmlBuilder.append(getString(R.string.desc_ref_014)); htmlBuilder.append("</li>");
+            htmlBuilder.append("<li>"); htmlBuilder.append(getString(R.string.desc_ref_015)); htmlBuilder.append("</li>");
+            htmlBuilder.append("<li>"); htmlBuilder.append(getString(R.string.desc_ref_016)); htmlBuilder.append("</li>");
+            htmlBuilder.append("</ol>");
+
+            // Table creation
+            htmlBuilder.append("<h2>Scan results</h2>");
+            htmlBuilder.append("<b>Legend</b>:<br/><span style=\"background-color:");
+            htmlBuilder.append(COMMAND_EXECUTED_BG_COLOR);
+            htmlBuilder.append("\">Green cell</span> means that command has been executed, <span style=\"background-color:");
+            htmlBuilder.append(COMMAND_NOT_EXECUTED_BG_COLOR);
+            htmlBuilder.append("\">red cell</span> means that it was not. For safety reasons.<br/>TODO means that description of such commands will be added later.<br/><br/>");
+            htmlBuilder.append("<table><tr><th>Command</th><th>Description</th><th>Clean answer</th><th>Available answer</th><th>Current answer</th></tr>");
+
             Set<String> keys = mCommands.keySet();
-            for (String k : keys) {
+
+            int totalCommands = mCommands.size();
+            int processedCommands = 0;
+            int oldPercent = 0;
+
+            Log.d(TAG, "mCommands.size = " + String.valueOf(totalCommands));
+
+            List<String> keysList = new ArrayList(keys);
+            Collections.sort(keysList);
+
+            mHandler.post(new Runnable() {
+                public void run() {
+                    mDebugOutput.append("Executing commands...\r\n");
+                }
+            });
+
+            for (String k : keysList) {
+
+                /*
+                try {
+                    Thread.sleep(POLL_TIMEOUT_STEP_MS * 2);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                */
+
                 IATcommand cmd = mCommands.get(k);
-                if (cmd != null) {
-                    runCommand(cmd);
+                Log.d(TAG, "cmd = " + cmd.getCommand());
+
+                runCommand(cmd);
+
+                htmlBuilder.append("<tr>");
+                htmlBuilder.append("<td valign=\"top\"><code>");
+                htmlBuilder.append(cmd.getCommand());
+                htmlBuilder.append("</code></td>");
+                htmlBuilder.append("<td valign=\"top\"><code>");
+                htmlBuilder.append(cmd.getDescription());
+                htmlBuilder.append("</code></td>");
+                htmlBuilder.append("<td valign=\"top\" bgcolor=\""); htmlBuilder.append(getCellBgColor(cmd, ATcommand.CLEAN)); htmlBuilder.append("\"><code>");
+                htmlBuilder.append(cmd.getRawAnswerClean().replaceAll("\n", "<br/>"));
+                htmlBuilder.append("</code></td>");
+                htmlBuilder.append("<td valign=\"top\" bgcolor=\""); htmlBuilder.append(getCellBgColor(cmd, ATcommand.AVAILABLE)); htmlBuilder.append("\"><code>");
+                htmlBuilder.append(cmd.getRawAnswerAvailable().replaceAll("\n", "<br/>"));
+                htmlBuilder.append("</code></td>");
+                htmlBuilder.append("<td valign=\"top\" bgcolor=\""); htmlBuilder.append(getCellBgColor(cmd, ATcommand.CURRENT)); htmlBuilder.append("\"><code>");
+                htmlBuilder.append(cmd.getRawAnswerCurrent().replaceAll("\n", "<br/>"));
+                htmlBuilder.append("</code></td>");
+                htmlBuilder.append("</tr>");
+
+                processedCommands++;
+                mProgressStatus = (int)(((double)processedCommands / (double)totalCommands) * 100.0);
+                if (mProgressStatus > oldPercent) {
+                    oldPercent = mProgressStatus;
+                    mHandler.post(new Runnable() {
+                        public void run() {
+                            mProgress.setProgress(mProgressStatus);
+                        }
+                    });
                 }
             }
+
+            htmlBuilder.append("</table></body></html>");
+
+            mHandler.post(new Runnable() {
+                public void run() {
+                    mDebugOutput.append("Saving results...\r\n");
+                }
+            });
+
+            try {
+                File file = new File(Environment.getExternalStorageDirectory(), "androidatcommands.html");
+                file.createNewFile();
+                FileOutputStream fOut = new FileOutputStream(file);
+                OutputStreamWriter myOutWriter = new OutputStreamWriter(fOut);
+                myOutWriter.append(htmlBuilder.toString());
+                myOutWriter.close();
+                fOut.close();
+            } catch (Exception ex) {
+                Log.d(TAG, "ex: " + ex);
+            }
+
+            mHandler.post(new Runnable() {
+                public void run() {
+                    mDebugOutput.append("Results have been saved to sdcard/androidatcommands.html\r\n");
+                }
+            });
+
         }
+    }
+
+    private String getCellBgColor(IATcommand cmd, int mode) {
+        return (cmd.getAllowedCommandFormats() & mode) > 0 ? COMMAND_EXECUTED_BG_COLOR : COMMAND_NOT_EXECUTED_BG_COLOR;
     }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_scan);
+
+        mProgress = (ProgressBar) findViewById(R.id.scan_progressbar);
+        mDebugOutput = (EditText) findViewById(R.id.debug_output);
 
         mCommands = new Hashtable<>();
 
@@ -153,6 +305,6 @@ public class ScanActivity extends SerialPortActivity {
         }
 
         long end = currentTimeMillis() - start;
-        Log.d(TAG, "\"" + aTcommand.getCommand() + "\" execution took " + String.valueOf(end) + " ms");
+        //Log.d(TAG, "\"" + aTcommand.getCommand() + "\" execution took " + String.valueOf(end) + " ms");
     }
 }

@@ -373,7 +373,7 @@
     <string name="desc_ref_011">Novatel wireless. AT Command Reference. RTT1201AT001. (http://documentation.nvtl.com/board/viewtopic.php?f=16&amp;t=603&amp;sid=3d4ef5ee6b11fc9332df3768d58d2fab)</string>
     <string name="desc_ref_012">Texas Instruments. AT Command Set Reference Guide. SPRA359A. (http://ics.p.lodz.pl/~mceg/telekom/texas_instruments.pdf)</string>
     <string name="desc_ref_013">MultiTech Systems. SocketModem® MT5692SMI. AT Commands Reference Guide. (http://www.multitech.com/documents/publications/manuals/s000468e.pdf)</string>
-    <string name="desc_ref_014">Sierra Wireless. AT Commands Interface Guide. AirPrime SL5011 and SL3010T. (http://update.maestro-wireless.com/M100/m100cdmaplus/SL3010T%20-%20AT%20Commands%20Interface%20Guide%20-%20V6.pdf)</string>
+    <string name="desc_ref_014" formatted="false">Sierra Wireless. AT Commands Interface Guide. AirPrime SL5011 and SL3010T. (http://update.maestro-wireless.com/M100/m100cdmaplus/SL3010T%20-%20AT%20Commands%20Interface%20Guide%20-%20V6.pdf)</string>
     <string name="desc_ref_015">Ezurio AT Commands Set. DSH_50003_v1v3 AT Command Reference. (http://www.kbmsystems.net/files/Ezurio_UserGuide-00584.pdf)</string>
     <string name="desc_ref_016">MultiTech Systems. AT Commands for Multi-Tech EDGE (E1) Modems. Reference Guide. PN S000474A, Revision A (https://www.multitech.net/developer/wp-content/uploads/2010/03/S000474A.pdf)</string>
 

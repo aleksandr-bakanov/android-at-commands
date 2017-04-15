@@ -8,7 +8,7 @@ public class ATcommand implements IATcommand {
     public static int CLEAN = 0x1;
     public static int AVAILABLE = 0x2;
     public static int CURRENT = 0x4;
-    protected static int DEFAULT_ANSWER_WAIT_TIMEOUT_MS = 10;
+    protected static int DEFAULT_ANSWER_WAIT_TIMEOUT_MS = 50;
     // Command itself (for example "$QCMRUE")
     private String mCommand;
     // Raw answer on pure command (for example "$QCMRUE")
@@ -31,6 +31,10 @@ public class ATcommand implements IATcommand {
         mRawAnswerClean = mRawAnswerAvailable = mRawAnswerCurrent = "";
         mDescription = "";
         mAllowedCommandFormats = 0;
+    }
+
+    public int getAllowedCommandFormats() {
+        return mAllowedCommandFormats;
     }
 
     public String getDescription() {
