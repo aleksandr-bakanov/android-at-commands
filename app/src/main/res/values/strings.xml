@@ -3,7 +3,7 @@
     <string name="error_configuration">Please configure your serial port first.</string>
     <string name="error_security">You do not have read/write permission to the serial port.</string>
     <string name="error_unknown">The serial port can not be opened for an unknown reason.</string>
-    <string name="quick_scan_button_title">Quick scan</string>
+    <string name="quick_scan_button_title">Scan</string>
     <string name="settings_button_title">Settings</string>
     <string name="console_button_title">Console</string>
     <string name="settings_title">Settings</string>
