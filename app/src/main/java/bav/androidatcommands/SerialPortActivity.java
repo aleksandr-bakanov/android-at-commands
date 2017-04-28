@@ -23,7 +23,9 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
 import android.os.Bundle;
+import android.util.Log;
 
+import java.io.DataOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -32,6 +34,7 @@ import java.security.InvalidParameterException;
 
 public class SerialPortActivity extends AppCompatActivity {
 
+    private static final String TAG = "SerialPortActivity";
     protected static final int READ_BUFFER_SIZE = 1024;
     protected SerialPort mSerialPort;
     protected OutputStream mOutputStream;
@@ -76,13 +79,24 @@ public class SerialPortActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
+        // Try to set SELinux to Permissive
+        try{
+            Process su = Runtime.getRuntime().exec("su");
+            DataOutputStream outputStream = new DataOutputStream(su.getOutputStream());
+            outputStream.writeBytes("setenforce 0\n");
+            outputStream.flush();
+            outputStream.writeBytes("exit\n");
+            outputStream.flush();
+            su.waitFor();
+        } catch(IOException e) {
+            Log.d(TAG, "ex: " + e);
+        } catch(InterruptedException e) {
+            Log.d(TAG, "ex: " + e);
+        }
         try {
             openSerialPort();
             mOutputStream = mSerialPort.getOutputStream();
             mInputStream = mSerialPort.getInputStream();
-
-
         } catch (SecurityException e) {
             DisplayError(R.string.error_security);
         } catch (IOException e) {

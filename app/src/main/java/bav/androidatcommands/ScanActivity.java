@@ -13,11 +13,9 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.List;
@@ -25,8 +23,6 @@ import java.util.Set;
 
 import bav.androidatcommands.commands.ATcommand;
 import bav.androidatcommands.commands.IATcommand;
-
-import static java.lang.System.currentTimeMillis;
 
 public class ScanActivity extends SerialPortActivity {
 
