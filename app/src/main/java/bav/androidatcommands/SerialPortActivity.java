@@ -56,8 +56,8 @@ public class SerialPortActivity extends AppCompatActivity {
         if (mSerialPort == null) {
             /* Read serial port parameters */
             SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(getApplication());
-            String path = sp.getString("device_preference", "");
-            int baudrate = Integer.decode(sp.getString("baudrate_preference", "-1"));
+            String path = sp.getString("device_preference", "/dev/smd11");
+            int baudrate = Integer.decode(sp.getString("baudrate_preference", "9600"));
 
             /* Check parameters */
             if ( (path.length() == 0) || (baudrate == -1)) {
