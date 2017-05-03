@@ -79,20 +79,6 @@ public class SerialPortActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        // Try to set SELinux to Permissive
-        try{
-            Process su = Runtime.getRuntime().exec("su");
-            DataOutputStream outputStream = new DataOutputStream(su.getOutputStream());
-            outputStream.writeBytes("setenforce 0\n");
-            outputStream.flush();
-            outputStream.writeBytes("exit\n");
-            outputStream.flush();
-            su.waitFor();
-        } catch(IOException e) {
-            Log.d(TAG, "ex: " + e);
-        } catch(InterruptedException e) {
-            Log.d(TAG, "ex: " + e);
-        }
         try {
             openSerialPort();
             mOutputStream = mSerialPort.getOutputStream();
